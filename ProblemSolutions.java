@@ -72,18 +72,52 @@ class ProblemSolutions {
      * @return boolean          - True if all exams can be taken, else false.
      */
 
-    public boolean canFinish(int numExams, 
-                             int[][] prerequisites) {
-      
-        int numNodes = numExams;  // # of nodes in graph
+     public boolean canFinish(int numExams, int[][] prerequisites) {
+    
+        ArrayList<Integer>[] adj = getAdjList(numExams, prerequisites);
+        
+    
+        int[] visited = new int[numExams];
+        
+    
+        for (int i = 0; i < numExams; i++) {
+            if (visited[i] == 0) {  // Only start DFS if the node is unvisited
+                if (cycleDetected(i, adj, visited)) {
+                    return false;  // Cycle detected, cannot finish all exams
+                }
+            }
+        }
+        
+        return true;  // No cycles detected, all exams can be taken
+    }
 
-        // Build directed graph's adjacency list
-        ArrayList<Integer>[] adj = getAdjList(numExams, 
-                                        prerequisites); 
+    
+    private boolean cycleDetected(int node, ArrayList<Integer>[] adj, int[] visited) {
+        if (visited[node] == 1) {
+    
+            return true;
+        }
+        
+        if (visited[node] == 2) {
+    
 
-        // ADD YOUR CODE HERE - ADD YOUR NAME / SECTION AT TOP OF FILE
-        return false;
+            return false;
+        }
 
+        // Mark the node as being visited
+        visited[node] = 1;
+        
+        // Explore all the neighbors (courses dependent on this one)
+        for (int neighbor : adj[node]) {
+            if (cycleDetected(neighbor, adj, visited)) {
+                return true;
+            }
+        }
+
+        // Mark the node as fully processed
+        visited[node] = 2;
+
+        return false;  // No cycle found
     }
 
 
@@ -165,34 +199,44 @@ class ProblemSolutions {
 
     public int numGroups(int[][] adjMatrix) {
         int numNodes = adjMatrix.length;
-        Map<Integer,List<Integer>> graph = new HashMap();
-        int i = 0, j =0;
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        int i = 0, j = 0;
 
-        /*
-         * Converting the Graph Adjacency Matrix to
-         * an Adjacency List representation. This
-         * sample code illustrates a technique to do so.
-         */
-
-        for(i = 0; i < numNodes ; i++){
-            for(j = 0; j < numNodes; j++){
-                if( adjMatrix[i][j] == 1 && i != j ){
-                    // Add AdjList for node i if not there
-                    graph.putIfAbsent(i, new ArrayList());
-                    // Add AdjList for node j if not there
-                    graph.putIfAbsent(j, new ArrayList());
-
-                    // Update node i adjList to include node j
+        // Convert adjacency matrix to adjacency list representation
+        for(i = 0; i < numNodes; i++) {
+            for(j = 0; j < numNodes; j++) {
+                if(adjMatrix[i][j] == 1 && i != j) {
+                    graph.putIfAbsent(i, new ArrayList<>());
+                    graph.putIfAbsent(j, new ArrayList<>());
                     graph.get(i).add(j);
-                    // Update node j adjList to include node i
                     graph.get(j).add(i);
                 }
             }
         }
 
-        // YOUR CODE GOES HERE - you can add helper methods, you do not need
-        // to put all code in this method.
-        return -1;
+        boolean[] visited = new boolean[numNodes];  // Track visited nodes
+        int groupCount = 0;  // Count the number of groups
+
+        // Iterate through all nodes
+        for(i = 0; i < numNodes; i++) {
+            if (!visited[i]) {
+                // Start a DFS from node i if it has not been visited
+                traversal(i, visited, graph);
+                groupCount++;  // Every DFS from an unvisited node forms a new group
+            }
+        }
+
+        return groupCount;  // Return the number of groups
+    }
+
+    
+    private void traversal(int node, boolean[] visited, Map<Integer, List<Integer>> graph) {
+        visited[node] = true;  
+        for(int neighbor : graph.getOrDefault(node, new ArrayList<>())) {
+            if(!visited[neighbor]) {
+                traversal(neighbor, visited, graph);
+            }
+        }
     }
 
 }

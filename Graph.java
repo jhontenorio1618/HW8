@@ -101,10 +101,31 @@ public class Graph {
    * and/or more than one root vertex, then return -1.
    * 
    */
-  
   public int findRoot() {
+    int[] inDegree = new int[numVertices]; // Array to track incoming edges
 
-    // ADD YOUR CODE HERE - DO NOT FORGET TO ADD YOUR NAME/SECTION AT TOP OF FILE
-    return -1;
-  } 
+    // Count incoming edges for each vertex
+    for (int i = 0; i < numVertices; i++) {
+        for (Integer dest : adjListArr[i]) {
+            inDegree[dest]++;
+        }
+    }
+
+    int rootCount = 0;
+    int rootVertex = -1;
+
+    // Find the vertex with no incoming edges
+    for (int i = 0; i < numVertices; i++) {
+        if (inDegree[i] == 0) {
+            rootCount++;
+            rootVertex = i;
+        }
+    }
+
+    // If there is exactly one root vertex, return its value, else return -1
+    return (rootCount == 1) ? vertexValues.get(rootVertex) : -1;
+}
+
+  
+
 }
